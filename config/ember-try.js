@@ -6,6 +6,14 @@ module.exports = async function() {
   return {
     scenarios: [
       {
+        name: 'ember-3.5',
+        npm: {
+          devDependencies: {
+            'ember-source': '~3.5.0'
+          }
+        }
+      },
+      {
         name: 'ember-lts-3.12',
         npm: {
           devDependencies: {
