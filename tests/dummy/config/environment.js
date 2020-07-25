@@ -47,5 +47,12 @@ module.exports = function(environment) {
     // here you can enable a production-specific feature
   }
 
+  ENV['pusher'] = {
+    key: process.env.PUSHER_APP_KEY,
+    cluster: process.env.PUSHER_CLUSTER,
+    logToConsole: false,
+    dummyApiEndpoint: 'http://localhost:3000/chat'
+  }
+
   return ENV;
 };

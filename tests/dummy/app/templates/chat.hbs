@@ -1,0 +1,12 @@
+<h3>Current Room: {{this.channel.name}}</h3>
+
+<form {{on 'submit' this.sendMessage}}>
+  <Input @value={{this.author}} placeholder='Your name' />
+  <Input @value={{this.body}} placeholder='Your message' />
+  <button type='submit'>Send</button>
+</form>
+<ul>
+  {{#each this.messages as |message|}}
+    <li><strong>{{message.author}}</strong>: {{message.body}} ({{message.timestamp}})</li>
+  {{/each}}
+</ul>
