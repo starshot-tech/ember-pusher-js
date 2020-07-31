@@ -10,7 +10,7 @@ import Pusher, { Channel } from 'pusher-js';
 import { PusherMock } from 'pusher-js-mock';
 import PusherWithEncryption from 'pusher-js/with-encryption';
 
-interface PusherSubscriber {
+export interface PusherSubscriber {
   PUSHER_SUBSCRIPTIONS: {
       [k: string]: string | string[];
   };

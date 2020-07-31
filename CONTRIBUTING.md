@@ -2,7 +2,7 @@
 
 ## Installation
 
-* `git clone <repository-url>`
+* `git clone git@github.com:starshot-tech/ember-pusher-js.git`
 * `cd ember-pusher-js`
 * `npm install`
 
