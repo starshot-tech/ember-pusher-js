@@ -1,11 +1,13 @@
+import { A } from '@ember/array';
+import EmberObject from '@ember/object';
 import Route from '@ember/routing/route';
 
-export default class ApplicationRoute extends Route {
+export default Route.extend({
   model() {
-    return [
-      { name: 'Channel 1', channel: 'channel-1' },
-      { name: 'Channel 2', channel: 'channel-2' },
-      { name: 'Channel 3', channel: 'channel-3' }
-    ]
+    return A([
+      EmberObject.create({ name: 'Channel 1', channel: 'channel-1' }),
+      EmberObject.create({ name: 'Channel 2', channel: 'channel-2' }),
+      EmberObject.create({ name: 'Channel 3', channel: 'channel-3' })
+    ]);
   }
-}
+});

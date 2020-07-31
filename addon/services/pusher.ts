@@ -6,10 +6,17 @@ import Service from '@ember/service';
 import { camelize } from '@ember/string';
 import Ember from 'ember';
 import config from 'ember-get-config';
-import { PusherSubscriber } from 'ember-pusher-js';
 import Pusher, { Channel } from 'pusher-js';
 import { PusherMock } from 'pusher-js-mock';
 import PusherWithEncryption from 'pusher-js/with-encryption';
+
+interface PusherSubscriber {
+  PUSHER_SUBSCRIPTIONS: {
+      [k: string]: string | string[];
+  };
+  send(evt: string, handler: Function): void;
+  willDestroy(callback: Function): void;
+}
 
 interface PusherBindings {
   [k: string]: {
@@ -25,12 +32,13 @@ export default class PusherService extends Service {
   private bindings: PusherBindings;
 
   public client: Pusher|PusherMock;
-  public isDisconnected: boolean = true;
+  public isDisconnected: boolean;
 
   constructor() {
     super(...arguments);
 
-    this.pusherConfig = config.pusher;
+    this.isDisconnected = true;
+    this.pusherConfig = config.pusher || {};
     this.bindings = {};
     this.client = this.setup();
   }
@@ -151,7 +159,7 @@ export default class PusherService extends Service {
       return this.setupForTest();
     }
 
-    Pusher.logToConsole = this.pusherConfig.logToConsole || false;
+    this.pusherClass.logToConsole = this.pusherConfig.logToConsole || false;
 
     const { key, cluster } = this.pusherConfig;
     const client = new this.pusherClass(key, { cluster });

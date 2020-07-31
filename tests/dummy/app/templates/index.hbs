@@ -1,9 +1,9 @@
 <h3>Pick a room:</h3>
 
 <ul>
-  {{#each this.model as |room|}}
+  {{#each model as |room|}}
     <li>
-      <LinkTo @route="index.chat" @model={{room.channel}}>{{room.name}}</LinkTo>
+      {{#link-to "chat" room.channel}}{{room.name}}{{/link-to}}
     </li>
   {{/each}}
 </ul>

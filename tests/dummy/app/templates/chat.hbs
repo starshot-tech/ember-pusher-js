@@ -1,12 +1,12 @@
-<h3>Current Room: {{this.channel.name}}</h3>
+<h3>Current Room: {{channel.name}}</h3>
 
-<form {{on 'submit' this.sendMessage}}>
-  <Input @value={{this.author}} placeholder='Your name' />
-  <Input @value={{this.body}} placeholder='Your message' />
+<form {{action 'sendMessage' on='submit'}}>
+  {{input value=author placeholder='Your name'}}
+  {{input value=body placeholder='Your message'}}
   <button type='submit'>Send</button>
 </form>
 <ul>
-  {{#each this.messages as |message|}}
+  {{#each messages as |message|}}
     <li><strong>{{message.author}}</strong>: {{message.body}} ({{message.timestamp}})</li>
   {{/each}}
 </ul>

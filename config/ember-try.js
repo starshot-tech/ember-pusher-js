@@ -7,9 +7,16 @@ module.exports = async function() {
     scenarios: [
       {
         name: 'ember-3.5',
+        env: {
+          EMBER_OPTIONAL_FEATURES: JSON.stringify({
+            'jquery-integration': true
+          })
+        },
         npm: {
           devDependencies: {
-            'ember-source': '~3.5.0'
+            'ember-native-class-polyfill': '^1.0.6',
+            'ember-source': '~3.5.0',
+            '@ember/jquery': '^0.5.1'
           }
         }
       },
