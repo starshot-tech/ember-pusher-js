@@ -2,13 +2,22 @@
 
 const getChannelURL = require('ember-source-channel-url');
 
+const isCI = !!process.env.CI;
+const ciOptions = '--silent --reporter xunit > ./reports/test_results.xml';
+
+function buildCommand(classic) {
+  const base = classic ? 'ember test --filter classic' : 'ember test';
+  return isCI ? `${base} ${ciOptions}` : base;
+}
+
 module.exports = async function() {
   return {
+    command: buildCommand(false),
     useYarn: true,
     scenarios: [
       {
         name: 'ember-3.5',
-        command: 'ember test --filter classic',
+        command: buildCommand(true),
         env: {
           EMBER_OPTIONAL_FEATURES: JSON.stringify({
             'jquery-integration': true
@@ -88,7 +97,7 @@ module.exports = async function() {
       },
       {
         name: 'ember-classic',
-        command: 'ember test --filter classic',
+        command: buildCommand(true),
         env: {
           EMBER_OPTIONAL_FEATURES: JSON.stringify({
             'application-template-wrapper': true,
