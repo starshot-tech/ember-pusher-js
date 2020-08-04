@@ -1,0 +1,7 @@
+{{#if this.users.length}}
+  <ul>
+    {{#each this.users as |user|}}
+      <li data-test-user>{{user.name}}</li>
+    {{/each}}
+  </ul>
+{{/if}}
