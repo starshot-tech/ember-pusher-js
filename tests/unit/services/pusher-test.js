@@ -3,7 +3,7 @@ import { module, test } from 'qunit';
 import { setupTest } from 'ember-qunit';
 import { PusherChannelMock } from 'pusher-js-mock';
 
-module('Unit | Service | pusher', function(hooks) {
+module('Unit | Service | pusher | classic', function(hooks) {
   setupTest(hooks);
 
   // Replace this with your real tests.
