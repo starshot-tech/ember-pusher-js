@@ -4,9 +4,11 @@ const getChannelURL = require('ember-source-channel-url');
 
 module.exports = async function() {
   return {
+    useYarn: true,
     scenarios: [
       {
         name: 'ember-3.5',
+        command: 'ember test --filter classic',
         env: {
           EMBER_OPTIONAL_FEATURES: JSON.stringify({
             'jquery-integration': true
@@ -22,6 +24,7 @@ module.exports = async function() {
       },
       {
         name: 'ember-lts-3.12',
+        command: 'ember test --filter classic',
         npm: {
           devDependencies: {
             'ember-source': '~3.12.0'
@@ -85,6 +88,7 @@ module.exports = async function() {
       },
       {
         name: 'ember-classic',
+        command: 'ember test --filter classic',
         env: {
           EMBER_OPTIONAL_FEATURES: JSON.stringify({
             'application-template-wrapper': true,

@@ -2,7 +2,9 @@
 
 <h3>Current Room: {{channel.name}}</h3>
 
-{{user-list}}
+{{#if showUserList}}
+  {{user-list}}
+{{/if}}
 
 <form {{action 'sendMessage' on='submit'}}>
   {{input value=author placeholder='Your name' data-test-author='author'}}

@@ -1,6 +1,9 @@
 import Controller from '@ember/controller';
+import { computed } from '@ember/object';
 
 export default Controller.extend({
+  showUserList: computed.equal('channel.channel', 'channel-3'),
+
   actions: {
     sendMessage() {
       const headers = {
