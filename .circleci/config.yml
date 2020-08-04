@@ -1,0 +1,125 @@
+version: 2.1
+
+orbs:
+  node: circleci/node@2.1.1
+
+defaults: &defaults
+  docker:
+    - image: circleci/node:10-browsers
+      environment:
+        JOBS: 1
+
+jobs:
+  prepare:
+    <<: *defaults
+    steps:
+      - checkout
+      - node/install-packages:
+          pkg-manager: "yarn"
+          cache-key: "yarn.lock"
+          cache-version: "v1"
+          include-branch-in-cache-key: false
+      - run:
+          name: Generate reports folder
+          command: mkdir reports
+      - persist_to_workspace:
+          root: .
+          paths:
+            - .
+
+  lint:
+    <<: *defaults
+    steps:
+      - attach_workspace:
+          at: .
+      - run:
+          name: Lint JavaScript
+          command: yarn lint:js
+
+  test:
+    <<: *defaults
+    parameters:
+      scenario:
+        type: enum
+        enum:
+          [
+            "3.5",
+            "lts-3.12",
+            "lts-3.16",
+            "release",
+            "beta",
+            "canary",
+            "default",
+            "default-with-jquery",
+            "classic",
+          ]
+        default: "default"
+    steps:
+      - attach_workspace:
+          at: .
+      - run:
+          name: Run << parameters.scenario >> Tests
+          command: yarn ember try:one ember-<< parameters.scenario >> --skip-cleanup=true
+      - store_test_results:
+          path: "reports"
+      - store_artifacts:
+          path: "reports"
+
+workflows:
+  test_matrix:
+    jobs:
+      - prepare
+      - lint:
+          requires:
+            - prepare
+      - test:
+          requires:
+            - prepare
+      - test:
+          name: test_3_5
+          scenario: '3.5'
+          requires:
+            - lint
+            - test
+      - test:
+          name: test_lts_3_12
+          scenario: lts-3.12
+          requires:
+            - lint
+            - test
+      - test:
+          name: test_lts_3_16
+          scenario: lts-3.16
+          requires:
+            - lint
+            - test
+      - test:
+          name: test_release
+          scenario: release
+          requires:
+            - lint
+            - test
+      - test:
+          name: test_beta
+          scenario: beta
+          requires:
+            - lint
+            - test
+      - test:
+          name: test_canary
+          scenario: canary
+          requires:
+            - lint
+            - test
+      - test:
+          name: test_default_with_jquery
+          scenario: "default-with-jquery"
+          requires:
+            - lint
+            - test
+      - test:
+          name: test_classic
+          scenario: classic
+          requires:
+            - lint
+            - test

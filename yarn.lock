@@ -4699,6 +4699,14 @@ ember-auto-import@^1.6.0:
     walk-sync "^0.3.3"
     webpack "~4.28"
 
+ember-circleci@^2.0.0:
+  version "2.0.0"
+  resolved "https://registry.yarnpkg.com/ember-circleci/-/ember-circleci-2.0.0.tgz#1f68514c90718314f56398efa104597e94613370"
+  integrity sha512-PpEbfA0NhS0KR3u6lKkRgYmY94AVCj5Q4wDJvlLYJwZU4JC27srksvqMYJCu1oquIp0Wz7ItLtHEpYlxaUUTEw==
+  dependencies:
+    ember-cli-babel "^7.19.0"
+    ember-cli-htmlbars "^4.3.1"
+
 ember-cli-babel-plugin-helpers@^1.0.0, ember-cli-babel-plugin-helpers@^1.1.0:
   version "1.1.0"
   resolved "https://registry.yarnpkg.com/ember-cli-babel-plugin-helpers/-/ember-cli-babel-plugin-helpers-1.1.0.tgz#de3baedd093163b6c2461f95964888c1676325ac"
