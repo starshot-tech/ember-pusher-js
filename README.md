@@ -24,6 +24,18 @@ If your project's `ember-source` dependency is <3.6.0, the `ember-native-class-p
 Usage
 ------------------------------------------------------------------------------
 
+### Configuration
+
+The addon expects a `pusher` object to be added to your `config/environment.js` ENV object.
+
+```javascript
+ENV['pusher'] = {
+  key: 'xxxxxxx' // Pusher APP key (required)
+  cluster: 'xx' // Pusher cluster (required)
+  logToConsole: false // Should socket events be logged to console
+}
+```
+
 ### The Pusher service
 
 #### `wireSubscriptions(target: EmberObject): void`
