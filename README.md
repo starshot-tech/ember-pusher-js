@@ -14,7 +14,7 @@ Compatibility
 Installation
 ------------------------------------------------------------------------------
 
-1. Add `ember-pusher-js: starshot-tech/ember-pusher-js` to `package.json`
+1. Add `"ember-pusher-js": "starshot-tech/ember-pusher-js"` to the `devDependencies` object in `package.json`
 2. `npm install` (or `yarn`)
 3. `ember g ember-pusher-js`
 
