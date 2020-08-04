@@ -1,12 +1,16 @@
+{{link-to "Back" "index"}}
+
 <h3>Current Room: {{channel.name}}</h3>
 
+{{user-list}}
+
 <form {{action 'sendMessage' on='submit'}}>
-  {{input value=author placeholder='Your name'}}
-  {{input value=body placeholder='Your message'}}
+  {{input value=author placeholder='Your name' data-test-author='author'}}
+  {{input value=body placeholder='Your message' data-test-body='body'}}
   <button type='submit'>Send</button>
 </form>
 <ul>
   {{#each messages as |message|}}
-    <li><strong>{{message.author}}</strong>: {{message.body}} ({{message.timestamp}})</li>
+    <li data-test-message={{message}}><strong>{{message.author}}</strong>: {{message.body}} ({{message.timestamp}})</li>
   {{/each}}
 </ul>

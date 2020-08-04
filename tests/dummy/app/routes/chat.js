@@ -14,8 +14,9 @@ export default Route.extend({
   },
 
   afterModel(model) {
-    const { channel } = model.channel;
-    this.pusher.wire(this, channel, ['new-message']);
+    this.PUSHER_SUBSCRIPTIONS = {}
+    this.PUSHER_SUBSCRIPTIONS[model.channel.channel] = ['new-message'];
+    this.pusher.wireSubscriptions(this);
   },
 
   setupController(controller, model) {

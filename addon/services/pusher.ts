@@ -1,10 +1,10 @@
 import { A } from '@ember/array';
 import MutableArray from '@ember/array/mutable';
 import { assert } from '@ember/debug';
+import EmberObject from '@ember/object';
 import { run } from '@ember/runloop';
 import Service from '@ember/service';
 import { camelize } from '@ember/string';
-import Ember from 'ember';
 import config from 'ember-get-config';
 import Pusher, { Channel } from 'pusher-js';
 import { PusherMock } from 'pusher-js-mock';
@@ -12,17 +12,18 @@ import PusherWithEncryption from 'pusher-js/with-encryption';
 
 export interface PusherSubscriber {
   PUSHER_SUBSCRIPTIONS: {
-      [k: string]: string | string[];
+    [k: string]: string | string[];
   };
-  send(evt: string, handler: Function): void;
-  willDestroy(callback: Function): void;
+  send?(action: string, ...args: any): void;
+  actions?: {[k: string]: Function};
+  willDestroy(): void;
 }
 
 interface PusherBindings {
   [k: string]: {
     channel: Channel,
     events: {
-      [k: string]: MutableArray<{handler: Function, name: string}>
+      [k: string]: MutableArray<{ handler: Function, name: string }>
     }
   }
 }
@@ -31,7 +32,7 @@ export default class PusherService extends Service {
   private pusherConfig: any;
   private bindings: PusherBindings;
 
-  public client: Pusher|PusherMock;
+  public readonly client: Pusher | PusherMock;
   public isDisconnected: boolean;
 
   constructor() {
@@ -47,13 +48,8 @@ export default class PusherService extends Service {
     return !this.isDisconnected;
   }
 
-  public get socketId(): string|undefined {
-    try {
-      return this.client.connection.socket_id;
-    } catch(e) {
-      Ember.Logger.warn(e);
-      return;
-    }
+  public get socketId(): string | undefined {
+    return this.client?.connection?.socket_id;
   }
 
   public subscribe(channelName: string): Channel {
@@ -67,7 +63,7 @@ export default class PusherService extends Service {
     return this.bindings[channelName].channel;
   }
 
-  public wire(target: PusherSubscriber, channelName: string, events: string|string[]): void {
+  public wire(target: PusherSubscriber, channelName: string, events: string | string[]): void {
     const channel = this.subscribe(channelName);
     const targetId = target.toString();
 
@@ -80,35 +76,31 @@ export default class PusherService extends Service {
     }
 
     events.forEach((eventName: string) => {
-      const normalizedEventName = camelize(eventName);
-      const events = this.bindings[channelName].events[targetId];
-      const handler = function(data: any) {
-        run(() => target.send(normalizedEventName, data));
-      }
-
-      channel.bind(eventName, handler);
-
-      const foundEvent = events.find((evt: {name: string, handler: Function}) => {
-        return evt.name === eventName;
-      });
-
-      if (foundEvent) {
-        foundEvent.handler = handler;
-        return;
-      }
-
-      events.pushObject({ handler, name: eventName });
-
-
-      target.willDestroy = (function() {
-        const toAppend = target.willDestroy;
-        return function() {
-          channel.unbind(eventName, handler);
-          events.removeObject({ handler, name: eventName });
-          toAppend.apply(target, arguments);
-        }
-      })();
+      this.wireEvent(eventName, channel, target);
     });
+  }
+
+  private wireEvent(eventName: string, channel: Channel, target: PusherSubscriber) {
+    const targetId = target.toString();
+
+    const normalizedEventName = camelize(eventName);
+    const events = this.bindings[channel.name].events[targetId];
+    const handler = function (data: any) {
+      run(() => target instanceof EmberObject
+        ? target.send!(normalizedEventName, data)
+        : target.actions![normalizedEventName].bind(target)(data)
+      );
+    }
+
+    channel.bind(eventName, handler);
+
+    const foundEvent = events.find((evt: { name: string, handler: Function }) => {
+      return evt.name === eventName;
+    });
+
+    foundEvent
+      ? foundEvent.handler = handler
+      : events.pushObject({ handler, name: eventName });
   }
 
   public unwire(target: PusherSubscriber, channelName: string): void {
@@ -136,6 +128,12 @@ export default class PusherService extends Service {
       const events = subscriptions[channelName];
       this.wire(target, channelName, events);
     });
+
+    const _willDestroy = target.willDestroy;
+    target.willDestroy = () => {
+      this.unwireSubscriptions(target);
+      _willDestroy.apply(target, arguments);
+    }
   }
 
   public unwireSubscriptions(target: PusherSubscriber): void {
@@ -144,13 +142,17 @@ export default class PusherService extends Service {
       this.unwire(target, channelName));
   }
 
+  public unsubscribeAll(): void {
+    Object.keys(this.client.channels).forEach((channel) => this.client.unsubscribe(channel));
+  }
+
   private get pusherClass(): any {
     return this.pusherConfig.withEncryption
       ? PusherWithEncryption
       : Pusher;
   }
 
-  private setup(): Pusher|PusherMock {
+  private setup(): Pusher | PusherMock {
     if (this.client) {
       return this.client;
     }

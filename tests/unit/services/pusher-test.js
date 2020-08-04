@@ -40,6 +40,10 @@ module('Unit | Service | pusher', function(hooks) {
     assert.ok(service.bindings['channel-1'].events[targetId]);
     assert.equal(service.bindings['channel-1'].events[target.toString()].length, 1);
     assert.deepEqual(Object.keys(service.client.channels), ['channel-1']);
+    // Make sure willDestroy was update to unwire
+    target.willDestroy();
+    assert.notOk(service.bindings['channel-1']);
+    assert.deepEqual(Object.keys(service.client.channels), []);
   });
 
   test('#unwire', function(assert) {
