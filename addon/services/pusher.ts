@@ -1,6 +1,7 @@
 import { A } from '@ember/array';
 import MutableArray from '@ember/array/mutable';
 import { assert } from '@ember/debug';
+import { registerDestructor } from '@ember/destroyable';
 import EmberObject from '@ember/object';
 import { run } from '@ember/runloop';
 import Service from '@ember/service';
@@ -12,18 +13,20 @@ import PusherWithEncryption from 'pusher-js/with-encryption';
 
 export interface PusherSubscriber {
   PUSHER_SUBSCRIPTIONS: {
-    [k: string]: string | string[];
+    [k: string]: string|string[];
   };
-  send?(action: string, ...args: any): void;
-  actions?: {[k: string]: Function};
-  willDestroy(): void;
+  send?(action: string, ...args: unknown[]): void;
+  actions?: {[k: string]: (...args: unknown[]) => void};
 }
 
 interface PusherBindings {
   [k: string]: {
     channel: Channel,
     events: {
-      [k: string]: MutableArray<{ handler: Function, name: string }>
+      [k: string]: MutableArray<{
+        handler: (data: any) => void,
+        name: string
+      }>
     }
   }
 }
@@ -32,7 +35,7 @@ export default class PusherService extends Service {
   private pusherConfig: any;
   private bindings: PusherBindings;
 
-  public readonly client: Pusher | PusherMock;
+  public readonly client: Pusher|PusherMock;
   public isDisconnected: boolean;
 
   constructor() {
@@ -48,7 +51,7 @@ export default class PusherService extends Service {
     return !this.isDisconnected;
   }
 
-  public get socketId(): string | undefined {
+  public get socketId(): string|undefined {
     return this.client?.connection?.socket_id;
   }
 
@@ -63,7 +66,7 @@ export default class PusherService extends Service {
     return this.bindings[channelName].channel;
   }
 
-  public wire(target: PusherSubscriber, channelName: string, events: string | string[]): void {
+  public wire(target: PusherSubscriber, channelName: string, events: string|string[]): void {
     const channel = this.subscribe(channelName);
     const targetId = target.toString();
 
@@ -78,6 +81,8 @@ export default class PusherService extends Service {
     events.forEach((eventName: string) => {
       this.wireEvent(eventName, channel, target);
     });
+
+    registerDestructor(target, () => run(() => this.unwire(target, channelName)));
   }
 
   private wireEvent(eventName: string, channel: Channel, target: PusherSubscriber) {
@@ -85,7 +90,7 @@ export default class PusherService extends Service {
 
     const normalizedEventName = camelize(eventName);
     const events = this.bindings[channel.name].events[targetId];
-    const handler = function (data: any) {
+    const handler = (data: any) => {
       run(() => target instanceof EmberObject
         ? target.send!(normalizedEventName, data)
         : target.actions![normalizedEventName].bind(target)(data)
@@ -94,7 +99,7 @@ export default class PusherService extends Service {
 
     channel.bind(eventName, handler);
 
-    const foundEvent = events.find((evt: { name: string, handler: Function }) => {
+    const foundEvent = events.find((evt: { name: string, handler: (data: any) => void }) => {
       return evt.name === eventName;
     });
 
@@ -128,22 +133,21 @@ export default class PusherService extends Service {
       const events = subscriptions[channelName];
       this.wire(target, channelName, events);
     });
-
-    const _willDestroy = target.willDestroy;
-    target.willDestroy = () => {
-      this.unwireSubscriptions(target);
-      _willDestroy.apply(target, arguments);
-    }
   }
 
   public unwireSubscriptions(target: PusherSubscriber): void {
     const subscriptions = target.PUSHER_SUBSCRIPTIONS;
-    Object.keys(subscriptions).forEach((channelName: string) =>
-      this.unwire(target, channelName));
+    Object.keys(subscriptions).forEach((channelName: string) => {
+      this.unwire(target, channelName);
+    });
   }
 
   public unsubscribeAll(): void {
-    Object.keys(this.client.channels).forEach((channel) => this.client.unsubscribe(channel));
+    Object.keys(this.client.channels).forEach((channel) => {
+      this.client.unsubscribe(channel);
+    });
+
+    this.bindings = {};
   }
 
   private get pusherClass(): any {
@@ -152,7 +156,7 @@ export default class PusherService extends Service {
       : Pusher;
   }
 
-  private setup(): Pusher | PusherMock {
+  private setup(): Pusher|PusherMock {
     if (this.client) {
       return this.client;
     }
