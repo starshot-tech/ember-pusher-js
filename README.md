@@ -14,10 +14,9 @@ Compatibility
 Installation
 ------------------------------------------------------------------------------
 
-1. Add `"ember-pusher-js": "starshot-tech/ember-pusher-js"` to the `devDependencies` object in `package.json`
-2. `npm install` (or `yarn`)
-3. `ember g ember-pusher-js`
-
+```
+ember install ember-pusher-js
+```
 
 If your project's `ember-source` dependency is <3.6.0, the `ember-native-class-polyfill` package will be installed as an additional dependency
 
