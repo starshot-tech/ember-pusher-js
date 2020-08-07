@@ -5,9 +5,9 @@
   "keywords": [
     "ember-addon"
   ],
-  "repository": "",
+  "repository": "https://github.com/starshot-tech/ember-pusher-js",
   "license": "MIT",
-  "author": "",
+  "author": "Starshot Technologies",
   "directories": {
     "doc": "doc",
     "test": "tests"
