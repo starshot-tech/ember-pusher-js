@@ -1,7 +1,6 @@
 import { A } from '@ember/array';
 import MutableArray from '@ember/array/mutable';
 import { assert } from '@ember/debug';
-import { registerDestructor } from '@ember/destroyable';
 import EmberObject from '@ember/object';
 import { run } from '@ember/runloop';
 import Service from '@ember/service';
@@ -17,6 +16,7 @@ export interface PusherSubscriber {
   };
   send?(action: string, ...args: unknown[]): void;
   actions?: {[k: string]: (...args: unknown[]) => void};
+  willDestroy: () => void;
 }
 
 interface PusherBindings {
@@ -82,7 +82,11 @@ export default class PusherService extends Service {
       this.wireEvent(eventName, channel, target);
     });
 
-    registerDestructor(target, () => run(() => this.unwire(target, channelName)));
+    const _willDestroy = target.willDestroy;
+    target.willDestroy = () => {
+      this.unwire(target, channelName);
+      _willDestroy.apply(target, arguments);
+    }
   }
 
   private wireEvent(eventName: string, channel: Channel, target: PusherSubscriber) {

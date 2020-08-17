@@ -31,7 +31,6 @@
     "ember-cli-babel": "^7.19.0",
     "ember-cli-htmlbars": "^4.3.1",
     "ember-cli-typescript": "^3.1.4",
-    "ember-destroyable-polyfill": "^2.0.1",
     "ember-get-config": "^0.2.4",
     "pusher-js": "^6.0.3",
     "pusher-js-mock": "^0.3.3"
