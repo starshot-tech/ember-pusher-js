@@ -171,8 +171,8 @@ export default class PusherService extends Service {
 
     this.pusherClass.logToConsole = this.pusherConfig.logToConsole || false;
 
-    const { key, cluster } = this.pusherConfig;
-    const client = new this.pusherClass(key, { cluster });
+    const { key, cluster, auth, authEndpoint } = this.pusherConfig;
+    const client = new this.pusherClass(key, { cluster, auth, authEndpoint });
 
     client.connection.bind('connected', this.didConnect.bind(this));
     client.connection.bind('disconnected', this.didDisconnect.bind(this));
