@@ -119,6 +119,8 @@ export default class PusherService extends Service {
     const targetId = target.toString();
     const events = this.bindings[channelName].events[targetId];
 
+    if (!events) { return; }
+
     events.forEach((evt) => {
       channel.unbind(evt.name, evt.handler);
     });
