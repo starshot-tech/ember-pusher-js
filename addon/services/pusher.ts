@@ -113,9 +113,13 @@ export default class PusherService extends Service {
   }
 
   public unwire(target: PusherSubscriber, channelName: string): void {
+    if (!this.bindings[channelName]) { return; }
+
     const { channel } = this.bindings[channelName];
     const targetId = target.toString();
     const events = this.bindings[channelName].events[targetId];
+
+    if (!events) { return; }
 
     events.forEach((evt) => {
       channel.unbind(evt.name, evt.handler);
